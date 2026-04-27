@@ -67,7 +67,7 @@ export function PropertyClient() {
       <motion.div 
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", damping: 35, stiffness: 300 }}
+        transition={{ type: "spring", damping: 25, stiffness: 400, mass: 0.8 }}
         className="relative w-full max-w-md mx-auto h-[85vh] bg-white rounded-t-[3rem] overflow-hidden shadow-[0_-20px_40px_rgba(0,0,0,0.15)] flex flex-col"
       >
         <div className={`absolute top-0 left-0 right-0 z-[10001] px-5 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm pt-4 pb-4' : 'bg-transparent pt-10 pb-4'}`}>
