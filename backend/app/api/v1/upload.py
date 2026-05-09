@@ -15,4 +15,4 @@ async def upload_image(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
         
-    return {"url": f"http://localhost:8000/uploads/{filename}"}
+    return {"url": f"/api/v1/uploads/{filename}"}

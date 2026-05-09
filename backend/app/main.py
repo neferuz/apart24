@@ -27,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/api/v1/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 from app.api.v1 import apartments, complexes, bookings, dashboard, upload, bot
 
