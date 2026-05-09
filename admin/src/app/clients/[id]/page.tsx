@@ -30,30 +30,19 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const CLIENT = {
-  id: "1",
-  name: "Александр Волков",
-  phone: "+998 90 123 45 67",
-  email: "alex.volkov@example.com",
-  joined: "12 Апреля 2023",
-  status: "VIP Гость",
-  totalSpent: "1,540,000",
-  totalBookings: 12,
-  avgStay: "3.2 дня",
-  avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
-  history: [
-    { id: "1024", property: "ЖК Лазурный, 45", dates: "12.04.24 - 15.04.24", amount: "450,000", status: "Оплачено", color: "emerald", guests: 2, checkIn: "12.04.2024", checkOut: "15.04.2024", nights: 3, pricePerNight: "150,000" },
-    { id: "1018", property: "ЖК Центр, 12", dates: "01.03.24 - 03.03.24", amount: "320,000", status: "Оплачено", color: "emerald", guests: 1, checkIn: "01.03.2024", checkOut: "03.03.2024", nights: 2, pricePerNight: "160,000" },
-    { id: "985", property: "ЖК Скай, 102", dates: "15.02.24 - 18.02.24", amount: "280,000", status: "Оплачено", color: "emerald", guests: 2, checkIn: "15.02.2024", checkOut: "18.02.2024", nights: 3, pricePerNight: "93,333" },
-    { id: "942", property: "ЖК Лазурный, 45", dates: "10.01.24 - 12.01.24", amount: "490,000", status: "Отмена", color: "red", guests: 4, checkIn: "10.01.2024", checkOut: "12.01.2024", nights: 2, pricePerNight: "245,000" },
-  ]
-};
+import { api } from "@/services/api";
+import { format, differenceInDays } from "date-fns";
+import { ru } from "date-fns/locale";
 
 export default function ClientProfilePage() {
+  const params = useParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("history");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<typeof CLIENT.history[0] | null>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<any | null>(null);
+  const [client, setClient] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (selectedHistoryItem || showDeleteConfirm) {
@@ -63,6 +52,69 @@ export default function ClientProfilePage() {
     }
     return () => { document.body.style.overflow = 'unset'; };
   }, [selectedHistoryItem, showDeleteConfirm]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const id = params.id as string;
+        const [clientData, bookings] = await Promise.all([
+          api.getClient(id),
+          api.getClientBookings(id)
+        ]);
+
+        if (clientData) {
+          setClient(clientData);
+          
+          const mappedHistory = bookings.map((b: any) => {
+            const checkIn = new Date(b.check_in);
+            const checkOut = new Date(b.check_out);
+            const nights = differenceInDays(checkOut, checkIn) || 1;
+            
+            return {
+              id: b.id,
+              property: b.apartment?.title || `Объект #${b.apartment_id}`,
+              dates: `${format(checkIn, "dd.MM.yy")} - ${format(checkOut, "dd.MM.yy")}`,
+              amount: b.total_price.toLocaleString("ru-RU"),
+              status: b.status === "paid" ? "Оплачено" : b.status === "cancelled" ? "Отмена" : b.status === "confirmed" ? "Подтверждено" : "Ожидает",
+              color: b.status === "paid" || b.status === "confirmed" ? "emerald" : "red",
+              guests: b.apartment?.guests || 1,
+              checkIn: format(checkIn, "dd.MM.yyyy"),
+              checkOut: format(checkOut, "dd.MM.yyyy"),
+              nights,
+              pricePerNight: (b.total_price / nights).toLocaleString("ru-RU")
+            };
+          });
+          setHistory(mappedHistory);
+        }
+      } catch (error) {
+        console.error("Failed to load client data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, [params.id]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center py-20">
+        <div className="size-8 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!client) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center py-20">
+        <h2 className="text-xl font-bold mb-4">Клиент не найден</h2>
+        <button onClick={() => router.back()} className="px-4 py-2 bg-slate-900 text-white rounded-xl">Вернуться</button>
+      </div>
+    );
+  }
+
+  const totalSpent = history.reduce((sum, h) => sum + parseInt(h.amount.replace(/\D/g, "")), 0);
+  const totalNights = history.reduce((sum, h) => sum + h.nights, 0);
+  const avgStay = history.length ? (totalNights / history.length).toFixed(1) : "0";
 
   return (
     <div className="w-full flex flex-col relative font-sans pb-10">
@@ -96,30 +148,30 @@ export default function ClientProfilePage() {
         <div className="px-6 pb-6">
            <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-10 relative z-10">
               <div className="relative size-24 shrink-0">
-                 <img src={CLIENT.avatar} alt={CLIENT.name} className="size-full object-cover rounded-[24px] border-4 border-white shadow-lg shadow-black/5" />
+                 <img src={client.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name || "Client")}&background=random`} alt={client.name} className="size-full object-cover rounded-[24px] border-4 border-white shadow-lg shadow-black/5" />
                  <div className="absolute -bottom-1 -right-1 size-7 bg-white border border-slate-100 rounded-lg flex items-center justify-center shadow-md">
                     <ShieldCheck className="size-3.5 text-emerald-500" />
                  </div>
               </div>
               <div className="flex-1 pb-1">
                  <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-[20px] font-black tracking-tight leading-none">{CLIENT.name}</h1>
+                    <h1 className="text-[20px] font-black tracking-tight leading-none">{client.name}</h1>
                     <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[8px] font-black uppercase tracking-widest border border-primary/10">
-                       {CLIENT.status}
+                       Постоянный
                     </span>
                  </div>
                  <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
                        <Phone className="size-3" />
-                       {CLIENT.phone}
+                       {client.phone || "Не указан"}
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
                        <Mail className="size-3" />
-                       {CLIENT.email}
+                       Нет email
                     </div>
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
                        <Calendar className="size-3" />
-                       В СИСТЕМЕ С {CLIENT.joined}
+                       В СИСТЕМЕ С {format(new Date(client.created_at || Date.now()), "dd.MM.yyyy")}
                     </div>
                  </div>
               </div>
@@ -128,9 +180,9 @@ export default function ClientProfilePage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 border-t border-slate-50">
            {[
-             { label: "ПОТРАЧЕНО", value: CLIENT.totalSpent, icon: CreditCard, color: "text-emerald-500" },
-             { label: "ЗАЕЗДЫ", value: CLIENT.totalBookings, icon: ShoppingBag, color: "text-blue-500" },
-             { label: "СР. СРОК", value: CLIENT.avgStay, icon: Clock, color: "text-amber-500" },
+             { label: "ПОТРАЧЕНО", value: totalSpent.toLocaleString("ru-RU"), icon: CreditCard, color: "text-emerald-500" },
+             { label: "ЗАЕЗДЫ", value: history.length, icon: ShoppingBag, color: "text-blue-500" },
+             { label: "СР. СРОК", value: `${avgStay} дня`, icon: Clock, color: "text-amber-500" },
              { label: "РЕЙТИНГ", value: "4.95", icon: Star, color: "text-primary" },
            ].map((s, i) => (
              <div key={i} className={cn("p-4 flex flex-col gap-1", i < 3 && "border-r border-slate-50")}>
@@ -166,7 +218,7 @@ export default function ClientProfilePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {CLIENT.history.map((h) => (
+                  {history.map((h) => (
                     <tr 
                       key={h.id} 
                       className="group hover:bg-slate-50/50 transition-colors cursor-pointer"
@@ -195,11 +247,11 @@ export default function ClientProfilePage() {
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Имя Фамилия</label>
-                       <input defaultValue={CLIENT.name} className="w-full h-9 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none focus:ring-1 focus:ring-primary/20" />
+                       <input defaultValue={client.name} className="w-full h-9 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none focus:ring-1 focus:ring-primary/20" />
                     </div>
                     <div className="space-y-1.5">
                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Телефон</label>
-                       <input defaultValue={CLIENT.phone} className="w-full h-9 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none focus:ring-1 focus:ring-primary/20" />
+                       <input defaultValue={client.phone} className="w-full h-9 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none focus:ring-1 focus:ring-primary/20" />
                     </div>
                  </div>
                  <div className="pt-2">
@@ -327,7 +379,7 @@ export default function ClientProfilePage() {
                     <AlertTriangle className="size-6 text-red-500" />
                   </div>
                   <h3 className="text-[16px] font-black uppercase tracking-tight mb-1">Удалить?</h3>
-                  <p className="text-[11px] text-slate-500 font-bold mb-6">{CLIENT.name} будет удален.</p>
+                  <p className="text-[11px] text-slate-500 font-bold mb-6">{client.name} будет удален.</p>
                   <div className="grid grid-cols-2 gap-3 w-full">
                     <button onClick={() => setShowDeleteConfirm(false)} className="h-10 rounded-xl bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-widest">Отмена</button>
                     <button onClick={() => { router.push("/clients"); }} className="h-10 rounded-xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest">Удалить</button>

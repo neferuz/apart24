@@ -106,6 +106,16 @@ export const api = {
     return res.json();
   },
 
+  async getClient(id: number | string) {
+    const clients = await this.getClients();
+    return clients.find((c: any) => String(c.id) === String(id));
+  },
+
+  async getClientBookings(id: number | string) {
+    const bookings = await this.getBookings();
+    return bookings.filter((b: any) => String(b.client_id) === String(id));
+  },
+
   // --- Dashboard ---
   async getStats() {
     const res = await fetch(`${API_URL}/dashboard/stats`);
