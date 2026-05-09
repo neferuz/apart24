@@ -148,7 +148,7 @@ export default function ClientProfilePage() {
         <div className="px-6 pb-6">
            <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-10 relative z-10">
               <div className="relative size-24 shrink-0">
-                 <img src={client.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name || "Client")}&background=random`} alt={client.name} className="size-full object-cover rounded-[24px] border-4 border-white shadow-lg shadow-black/5" />
+                 <img src={client.avatar || `https://i.pravatar.cc/150?u=${client.id}`} alt={client.name} className="size-full object-cover rounded-[24px] border-4 border-white shadow-lg shadow-black/5" />
                  <div className="absolute -bottom-1 -right-1 size-7 bg-white border border-slate-100 rounded-lg flex items-center justify-center shadow-md">
                     <ShieldCheck className="size-3.5 text-emerald-500" />
                  </div>
