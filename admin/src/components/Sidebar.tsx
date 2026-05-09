@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigation } from "@/context/NavigationContext";
+import { useAuth } from "@/context/AuthContext";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Дашборд", href: "/" },
@@ -27,6 +28,7 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isSidebarOpen, closeSidebar } = useNavigation();
+  const { logout } = useAuth();
 
   const SidebarContent = (
     <aside className={cn(
@@ -79,7 +81,10 @@ export default function Sidebar() {
 
       {/* ── Bottom Actions ── */}
       <div className="p-4 mt-auto border-t border-slate-100 shrink-0">
-        <button className="w-full flex items-center h-10 px-3 gap-3 rounded-xl text-[11px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-all shadow-none">
+        <button 
+          onClick={logout}
+          className="w-full flex items-center h-10 px-3 gap-3 rounded-xl text-[11px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-all shadow-none"
+        >
           <LogOut className="size-4" />
           <span className="mt-0.5">Выйти</span>
         </button>
