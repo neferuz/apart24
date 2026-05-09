@@ -44,6 +44,7 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       tg.setHeaderColor('#007AFF');
       tg.expand();
       tg.enableClosingConfirmation();
+      tg.disableVerticalSwipes?.();
       tg.ready();
     } else {
       // 2. Mock User for Local Development
