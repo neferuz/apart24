@@ -67,6 +67,7 @@ export default function ApartmentsPage() {
 
   const [newApartment, setNewApartment] = useState({
     title: "",
+    description: "",
     complex_id: "",
     address: "",
     price: "",
@@ -176,6 +177,7 @@ export default function ApartmentsPage() {
     try {
       const payload = {
         title: newApartment.title,
+        description: newApartment.description,
         address: newApartment.address,
         price: parseFloat(newApartment.price.replace(/\s/g, '')),
         guests: parseInt(newApartment.guests),
@@ -191,6 +193,7 @@ export default function ApartmentsPage() {
       setApartments([created, ...apartments]);
       setNewApartment({
         title: "",
+        description: "",
         address: "",
         price: "",
         guests: "2",
@@ -373,6 +376,17 @@ export default function ApartmentsPage() {
                          value={newApartment.title} 
                          onChange={(e) => setNewApartment({...newApartment, title: e.target.value})} 
                          className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none focus:ring-1 focus:ring-primary/20 transition-all shadow-none" 
+                       />
+                    </div>
+
+                    <div className="space-y-1.5 px-1">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Описание</label>
+                       <textarea 
+                         rows={3}
+                         placeholder="Короткое описание квартиры..."
+                         value={newApartment.description} 
+                         onChange={(e) => setNewApartment({...newApartment, description: e.target.value})} 
+                         className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-medium outline-none resize-none focus:ring-1 focus:ring-primary/20 transition-all shadow-none" 
                        />
                     </div>
 

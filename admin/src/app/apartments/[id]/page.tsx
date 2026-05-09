@@ -439,6 +439,10 @@ export default function ApartmentDetailsPage() {
                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Описание</label>
                        <textarea rows={4} value={editData.description} onChange={(e) => setEditData({...editData, description: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-medium outline-none resize-none" />
                     </div>
+                    <div className="space-y-1.5 px-1">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Адрес</label>
+                       <input value={editData.address} onChange={(e) => setEditData({...editData, address: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
+                    </div>
                  </div>
 
                  <div className="space-y-4">
@@ -479,12 +483,33 @@ export default function ApartmentDetailsPage() {
 
                  <div className="grid grid-cols-2 gap-4 px-1 pb-4">
                     <div className="space-y-1.5">
-                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Цена</label>
-                       <input type="number" value={editData.price} onChange={(e) => setEditData({...editData, price: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold" />
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Цена (СУМ)</label>
+                       <input type="number" value={editData.price} onChange={(e) => setEditData({...editData, price: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
                     </div>
                     <div className="space-y-1.5">
                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Метраж</label>
-                       <input value={editData.size} onChange={(e) => setEditData({...editData, size: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold" />
+                       <input value={editData.size} onChange={(e) => setEditData({...editData, size: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Гости</label>
+                       <input type="number" value={editData.guests} onChange={(e) => setEditData({...editData, guests: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Спальни</label>
+                       <input type="number" value={editData.bedrooms} onChange={(e) => setEditData({...editData, bedrooms: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ванные</label>
+                       <input type="number" value={editData.bathrooms} onChange={(e) => setEditData({...editData, bathrooms: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
+                    </div>
+                    <div className="space-y-1.5"></div>
+                    <div className="space-y-1.5">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Широта (LAT)</label>
+                       <input type="text" value={editData.lat} onChange={(e) => setEditData({...editData, lat: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Долгота (LNG)</label>
+                       <input type="text" value={editData.lng} onChange={(e) => setEditData({...editData, lng: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none" />
                     </div>
                  </div>
               </div>
