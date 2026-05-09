@@ -19,10 +19,13 @@ def send_message(chat_id: str, text: str, reply_markup: dict = None):
     try:
         data = json.dumps(payload).encode('utf-8')
         req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req) as response:
-            return response.read()
+        with urllib.request.urlopen(req, timeout=15) as response:
+            res_body = response.read().decode('utf-8')
+            print(f"TG API Response for {chat_id}: {res_body}")
+            return res_body
     except Exception as e:
-        print(f"Error sending TG message: {e}")
+        print(f"Error sending TG message to {chat_id}: {e}")
+        return None
 
 def send_welcome(chat_id: str):
     text = (

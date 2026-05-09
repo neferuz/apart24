@@ -1,6 +1,8 @@
 import os
 import time
-import requests
+import json
+import urllib.request
+import urllib.parse
 from sqlalchemy.orm import Session
 import sys
 
@@ -14,6 +16,19 @@ from app.services.telegram_bot import send_welcome, send_message
 BOT_TOKEN = "8116683623:AAFJUkrkawLf6-4nNAkYEIDzNa8FZaEY1Cw"
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
+def tg_request(method, params=None):
+    url = f"{API_URL}/{method}"
+    if params:
+        query = urllib.parse.urlencode(params)
+        url += f"?{query}"
+    
+    try:
+        with urllib.request.urlopen(url, timeout=40) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except Exception as e:
+        print(f"TG API Request Error ({method}): {e}")
+        return None
+
 def process_update(update):
     db = SessionLocal()
     try:
@@ -21,9 +36,11 @@ def process_update(update):
             message = update["message"]
             chat_id = message["chat"]["id"]
             
-            if "text" in message and message["text"] == "/start":
-                print(f"Sending welcome to {chat_id}")
-                send_welcome(str(chat_id))
+            if "text" in message:
+                text = message["text"]
+                if text.startswith("/start"):
+                    print(f"Sending welcome to {chat_id}")
+                    send_welcome(str(chat_id))
                 
             elif "contact" in message:
                 contact = message["contact"]
@@ -43,37 +60,31 @@ def process_update(update):
 
 def main():
     # First, delete any webhook so polling can work
-    try:
-        res = requests.get(f"{API_URL}/deleteWebhook?drop_pending_updates=true", timeout=10)
-        print(f"Delete webhook response: {res.json()}")
-    except Exception as e:
-        print(f"Failed to delete webhook: {e}")
+    print("Deleting webhook...")
+    tg_request("deleteWebhook", {"drop_pending_updates": "true"})
     
     offset = None
-    print("Starting bot polling loop...")
+    print("Starting bot polling loop (urllib)...")
     
     while True:
         try:
-            url = f"{API_URL}/getUpdates?timeout=30"
+            params = {"timeout": 30}
             if offset:
-                url += f"&offset={offset}"
+                params["offset"] = offset
                 
-            resp = requests.get(url, timeout=40)
-            data = resp.json()
+            data = tg_request("getUpdates", params)
             
-            if data.get("ok"):
+            if data and data.get("ok"):
                 for update in data.get("result", []):
                     process_update(update)
                     offset = update["update_id"] + 1
             else:
-                print(f"Telegram error: {data}")
+                if data:
+                    print(f"Telegram error: {data}")
                 time.sleep(2)
                 
-        except requests.exceptions.RequestException as e:
-            print(f"Network error: {e}")
-            time.sleep(5)
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            print(f"Unexpected error in main loop: {e}")
             time.sleep(5)
 
 if __name__ == "__main__":
