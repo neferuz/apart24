@@ -10,7 +10,8 @@ import {
   Image as ImageIcon, Save, Map as MapIcon, Car, Bath, Utensils,
   Key, Snowflake, Zap, Smartphone, Thermometer, Star, TrendingUp, Maximize2,
   AlignLeft, BedDouble, Waves, Dumbbell, Ban, Baby, Laptop, PawPrint,
-  Bell, Lock, Sun, Microwave, Droplets, ArrowUpCircle, Shield
+  Bell, Lock, Sun, Microwave, Droplets, ArrowUpCircle, Shield,
+  Trees, TreePine, Flower2, Sofa, Monitor, Speaker, Gamepad2, Refrigerator, WashingMachine
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -25,8 +26,10 @@ const ICON_OPTIONS = [
   { name: "Waves", icon: Waves }, { name: "Dumbbell", icon: Dumbbell }, { name: "Ban", icon: Ban },
   { name: "Baby", icon: Baby }, { name: "Laptop", icon: Laptop }, { name: "PawPrint", icon: PawPrint },
   { name: "Bell", icon: Bell }, { name: "Lock", icon: Lock }, { name: "Sun", icon: Sun },
-  { name: "Microwave", icon: Microwave }, { name: "Droplets", icon: Droplets }, 
-  { name: "ArrowUpCircle", icon: ArrowUpCircle }, { name: "Shield", icon: Shield }
+  { name: "ArrowUpCircle", icon: ArrowUpCircle }, { name: "Shield", icon: Shield },
+  { name: "Trees", icon: Trees }, { name: "TreePine", icon: TreePine }, { name: "Flower2", icon: Flower2 },
+  { name: "Sofa", icon: Sofa }, { name: "Monitor", icon: Monitor }, { name: "Speaker", icon: Speaker },
+  { name: "Gamepad2", icon: Gamepad2 }, { name: "Refrigerator", icon: Refrigerator }, { name: "WashingMachine", icon: WashingMachine }
 ];
 
 const ICON_MAP: Record<string, any> = ICON_OPTIONS.reduce((acc, curr) => ({...acc, [curr.name]: curr.icon}), {});
