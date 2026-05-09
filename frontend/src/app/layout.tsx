@@ -34,6 +34,8 @@ export const viewport: Viewport = {
 import { AppProvider } from "@/context/AppContext";
 import { TelegramProvider } from "@/context/TelegramContext";
 
+import Script from "next/script";
+
 export default function RootLayout({
   children,
   modal,
@@ -44,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${evolventa.variable}`}>
       <head>
-        <script src="https://telegram.org/js/telegram-web-app.js" />
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
       </head>
       <body className="bg-[#F5F5F7] dark:bg-black antialiased overflow-x-hidden font-sans">
         <TelegramProvider>
