@@ -19,11 +19,14 @@ API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 def tg_request(method, params=None):
     url = f"{API_URL}/{method}"
     if params:
-        query = urllib.parse.urlencode(params)
-        url += f"?{query}"
+        # Use POST for everything to be safer and avoid long URL issues
+        data = urllib.parse.urlencode(params).encode('utf-8')
+        req = urllib.request.Request(url, data=data)
+    else:
+        req = urllib.request.Request(url)
     
     try:
-        with urllib.request.urlopen(url, timeout=40) as response:
+        with urllib.request.urlopen(req, timeout=45) as response:
             return json.loads(response.read().decode('utf-8'))
     except Exception as e:
         print(f"TG API Request Error ({method}): {e}")
@@ -59,12 +62,12 @@ def process_update(update):
         db.close()
 
 def main():
-    # First, delete any webhook so polling can work
-    print("Deleting webhook...")
-    tg_request("deleteWebhook", {"drop_pending_updates": "true"})
+    # Only delete webhook once, and DON'T drop pending updates unless you really have to
+    print("Initializing bot...")
+    tg_request("deleteWebhook")
     
-    offset = None
-    print("Starting bot polling loop (urllib)...")
+    offset = 0
+    print("Starting bot polling loop...")
     
     while True:
         try:
@@ -78,14 +81,14 @@ def main():
                 result = data.get("result", [])
                 if result:
                     print(f"Received {len(result)} updates")
-                for update in result:
-                    print(f"Processing update: {json.dumps(update)}")
-                    process_update(update)
-                    offset = update["update_id"] + 1
+                    for update in result:
+                        print(f"Processing update: {update.get('update_id')}")
+                        process_update(update)
+                        offset = update["update_id"] + 1
             else:
                 if data:
-                    print(f"Telegram error: {data}")
-                time.sleep(2)
+                    print(f"Telegram error or empty response: {data}")
+                time.sleep(1)
                 
         except Exception as e:
             print(f"Unexpected error in main loop: {e}")
