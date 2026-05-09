@@ -55,8 +55,6 @@ export default function WishlistPage() {
                <ApartmentList 
                   layout="grid"
                   items={likedItems} 
-                  liked={liked} 
-                  onToggleLike={toggleLike} 
                   onSelect={(item) => router.push(`/property/${item.id}`)} 
                />
             </div>

@@ -129,8 +129,6 @@ export function ComplexClient() {
           
           <ApartmentList 
             items={apartments} 
-            liked={liked} 
-            onToggleLike={toggleLike} 
             onSelect={(item) => router.push(`/property/${item.id}`)}
             layout="vertical"
           />

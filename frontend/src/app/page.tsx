@@ -160,8 +160,6 @@ export default function Home() {
                       title={group.name} 
                       complexId={group.id}
                       items={group.apartments} 
-                      liked={liked} 
-                      onToggleLike={toggleLike} 
                       onSelect={(item) => router.push(`/property/${item.id}`)} 
                     />
                   </div>

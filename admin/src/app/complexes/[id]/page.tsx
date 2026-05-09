@@ -6,7 +6,7 @@ import {
   ArrowLeft, MapPin, Users, Ruler, Plus, Search, 
   Edit2, Trash2, Building2, ChevronRight, Activity, 
   TrendingUp, Layers, DoorOpen, X, Camera, Navigation,
-  Home
+  Home, CheckCircle2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, formatNumber } from "@/lib/utils";

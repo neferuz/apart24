@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   Phone, 
@@ -22,28 +22,34 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-
-// Extended mock data for pagination - Deterministic to avoid hydration mismatch
-const allClients = Array.from({ length: 45 }, (_, i) => ({
-  id: i + 1,
-  name: ["Александр Волков", "Мария Соколова", "Иван Петров", "Елена Кузнецова", "Дмитрий Морозов", "Ольга Романова", "Артем Громов", "Светлана Белова", "Игорь Савин", "Анна Павлова"][i % 10] + (i > 9 ? ` ${Math.floor(i/10) + 1}` : ""),
-  phone: `+998 90 ${100 + i} ${10 + i} ${i % 10}${i % 10}`,
-  bookings: (i % 15) + 3,
-  spent: (i % 10 + 1) * 250000,
-  joined: new Date(2023, i % 12, (i % 28) + 1),
-  avatar: `https://i.pravatar.cc/100?u=${i}`
-}));
+import { api } from "@/services/api";
 
 export default function ClientsPage() {
+  const [clients, setClients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
   const [clientToDelete, setClientToDelete] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const filtered = allClients.filter((c) => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.phone.includes(searchQuery)
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const data = await api.getClients();
+        setClients(data);
+      } catch (error) {
+        console.error("Failed to load clients:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadClients();
+  }, []);
+
+  const filtered = clients.filter((c) => 
+    c.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.phone?.includes(searchQuery)
   );
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -85,10 +91,15 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="size-8 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
             { label: "Всего клиентов", value: "1,248", icon: Users, color: "text-blue-500", trend: "+12%", isUp: true },
             { label: "Повторные", value: "64%", icon: History, color: "text-amber-500", trend: "+5%", isUp: true },
             { label: "Активные", value: "412", icon: Activity, color: "text-emerald-500", trend: "+8", isUp: true },
@@ -214,6 +225,7 @@ export default function ClientsPage() {
           </div>
         </div>
       </div>
+    )}
     </div>
   );
 }
