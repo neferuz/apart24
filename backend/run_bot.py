@@ -75,7 +75,11 @@ def main():
             data = tg_request("getUpdates", params)
             
             if data and data.get("ok"):
-                for update in data.get("result", []):
+                result = data.get("result", [])
+                if result:
+                    print(f"Received {len(result)} updates")
+                for update in result:
+                    print(f"Processing update: {json.dumps(update)}")
                     process_update(update)
                     offset = update["update_id"] + 1
             else:
