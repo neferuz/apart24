@@ -49,6 +49,7 @@ export function PropertyClient() {
   const [selectingPhase, setSelectingPhase] = useState<'start' | 'end'>('start');
   const [relatedApartments, setRelatedApartments] = useState<any[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [datePickerMessage, setDatePickerMessage] = useState<string | null>(null);
   
   const nights = useMemo(() => {
     if (!startDate || !endDate) return 1;
@@ -117,14 +118,17 @@ export function PropertyClient() {
       setStartDate(day);
       setEndDate(null);
       setSelectingPhase('end');
+      setDatePickerMessage("Теперь выберите дату выезда");
     } else {
       if (startDate && day < startDate) {
         setStartDate(day);
         setEndDate(null);
         setSelectingPhase('end');
+        setDatePickerMessage("Теперь выберите дату выезда");
       } else {
         setEndDate(day);
         setSelectingPhase('start');
+        setDatePickerMessage(null);
       }
     }
   };
@@ -140,7 +144,13 @@ export function PropertyClient() {
   };
 
   const handleBook = async () => {
-    if (!startDate || !endDate) {
+    if (!startDate) {
+      setDatePickerMessage("Выберите дату заезда");
+      setIsLocalDateOpen(true);
+      return;
+    }
+    if (!endDate) {
+      setDatePickerMessage("Выберите дату выезда");
       setIsLocalDateOpen(true);
       return;
     }
@@ -438,7 +448,17 @@ export function PropertyClient() {
             <>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsLocalDateOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" />
               <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2.5rem] p-6 pb-10 shadow-2xl pointer-events-auto" >
-                <div className="flex items-center justify-between mb-6"><h3 className="text-[18px] font-black text-slate-900">Выберите даты</h3><button onClick={() => setIsLocalDateOpen(false)} className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><X className="h-4 w-4" /></button></div>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex flex-col">
+                    <h3 className="text-[18px] font-black text-slate-900">Выберите даты</h3>
+                    {datePickerMessage && (
+                      <span className="text-[12px] font-bold text-[#007AFF] animate-pulse">{datePickerMessage}</span>
+                    )}
+                  </div>
+                  <button onClick={() => { setIsLocalDateOpen(false); setDatePickerMessage(null); }} className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
                 <div className="flex items-center justify-between mb-4 px-2">
                   <button onClick={handlePrevMonth} className="h-9 w-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-100"><ChevronLeft className="h-4.5 w-4.5 text-slate-600" /></button>
                   <span className="text-[13px] font-black uppercase tracking-widest text-slate-800">{MONTHS[currentMonthIndex]} 2026</span>
@@ -452,14 +472,15 @@ export function PropertyClient() {
                 </div>
                 <button onClick={() => { 
                   if (!startDate) {
-                    alert("Пожалуйста, выберите дату заезда");
+                    setDatePickerMessage("Пожалуйста, выберите дату заезда");
                     return;
                   }
                   if (!endDate) {
-                    alert("Пожалуйста, выберите дату выезда");
+                    setDatePickerMessage("Пожалуйста, выберите дату выезда");
                     return;
                   }
                   setIsLocalDateOpen(false); 
+                  setDatePickerMessage(null);
                   setIsConfirmOpen(true); 
                 }} className="w-full h-14 bg-slate-900 text-white rounded-[1.25rem] text-[14px] font-black uppercase tracking-widest">Готово</button>
               </motion.div>
