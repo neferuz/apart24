@@ -69,3 +69,11 @@ def update_booking_status(db: Session, booking_id: int, status: str):
                 print(f"Failed to send status update notification: {e}")
                 
     return db_booking
+
+def delete_client(db: Session, client_id: int):
+    db_client = get_client(db, client_id)
+    if db_client:
+        db.delete(db_client)
+        db.commit()
+        return True
+    return False

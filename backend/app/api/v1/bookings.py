@@ -31,6 +31,13 @@ def create_client(client: schemas.ClientCreate, db: Session = Depends(get_db)):
         
     return crud.create_client(db=db, client=client)
 
+@router.delete("/clients/{client_id}")
+def delete_client(client_id: int, db: Session = Depends(get_db)):
+    success = crud.delete_client(db, client_id=client_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Client not found")
+    return {"message": "Client deleted successfully"}
+
 # --- BOOKINGS ---
 @router.get("/bookings/", response_model=List[schemas.Booking])
 def read_bookings(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):

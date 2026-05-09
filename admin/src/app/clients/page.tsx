@@ -56,9 +56,16 @@ export default function ClientsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedClients = filtered.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleDelete = () => {
-    // Logic for delete would go here
-    setClientToDelete(null);
+  const handleDelete = async () => {
+    if (!clientToDelete) return;
+    try {
+      await api.deleteClient(clientToDelete.id);
+      setClients(clients.filter(c => c.id !== clientToDelete.id));
+      setClientToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete client:", error);
+      alert("Ошибка при удалении клиента");
+    }
   };
 
   return (
@@ -178,7 +185,35 @@ export default function ClientsPage() {
                     >
                       <MoreVertical className="size-4 text-slate-900" />
                     </button>
-                    {/* ... (Active Menu Logic Same as Before) */}
+                    
+                    <AnimatePresence>
+                      {activeMenu === client.id && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setActiveMenu(null)} />
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="absolute right-6 top-14 w-48 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 p-2 z-20"
+                          >
+                            <button 
+                              onClick={() => window.location.href = `/clients/${client.id}`}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all group"
+                            >
+                              <Eye className="size-4 opacity-50 group-hover:opacity-100" />
+                              <span className="text-[11px] font-black uppercase tracking-tight">Профиль</span>
+                            </button>
+                            <button 
+                              onClick={() => { setActiveMenu(null); setClientToDelete(client); }}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 text-red-500 transition-all group"
+                            >
+                              <Trash2 className="size-4 opacity-50 group-hover:opacity-100" />
+                              <span className="text-[11px] font-black uppercase tracking-tight">Удалить</span>
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                   </td>
                 </tr>
               ))}
@@ -226,6 +261,52 @@ export default function ClientsPage() {
         </div>
       </div>
     )}
+
+    {/* Delete Confirmation Modal */}
+    <AnimatePresence>
+      {clientToDelete && (
+        <>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            onClick={() => setClientToDelete(null)}
+            className="fixed inset-0 bg-slate-900/10 backdrop-blur-md z-[1000]" 
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-[1001] p-4 pointer-events-none">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm border border-slate-100 shadow-2xl shadow-slate-200/50 pointer-events-auto"
+            >
+              <div className="size-16 rounded-[2rem] bg-red-50 text-red-500 flex items-center justify-center mb-6 border border-red-100 mx-auto">
+                <Trash2 className="size-8" />
+              </div>
+              <h3 className="text-[20px] font-black text-slate-900 text-center mb-2 tracking-tight">Удалить клиента?</h3>
+              <p className="text-[13px] font-medium text-slate-400 text-center mb-8 leading-relaxed">
+                Вы уверены, что хотите удалить <span className="text-slate-900 font-bold">{clientToDelete.name}</span>? Это действие нельзя отменить, и все данные будут потеряны.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => setClientToDelete(null)}
+                  className="h-14 rounded-2xl bg-slate-50 text-slate-900 text-[11px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
+                >
+                  Отмена
+                </button>
+                <button 
+                  onClick={handleDelete}
+                  className="h-14 rounded-2xl bg-red-500 text-white text-[11px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-200"
+                >
+                  Удалить
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
+
     </div>
   );
 }

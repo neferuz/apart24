@@ -115,6 +115,13 @@ export const api = {
     const bookings = await this.getBookings();
     return bookings.filter((b: any) => String(b.client_id) === String(id));
   },
+  
+  async deleteClient(id: number) {
+    const res = await fetch(`${API_URL}/clients/${id}`, {
+      method: 'DELETE',
+    });
+    return res.json();
+  },
 
   // --- Dashboard ---
   async getStats() {
