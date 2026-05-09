@@ -43,6 +43,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${evolventa.variable}`}>
+      <head>
+        <script src="https://telegram.org/js/telegram-web-app.js" />
+      </head>
       <body className="bg-[#F5F5F7] dark:bg-black antialiased overflow-x-hidden font-sans">
         <TelegramProvider>
           <AppProvider>

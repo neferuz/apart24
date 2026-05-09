@@ -4,7 +4,7 @@ import urllib.parse
 import os
 
 BOT_TOKEN = "8116683623:AAFJUkrkawLf6-4nNAkYEIDzNa8FZaEY1Cw"
-WEBAPP_URL = "https://apart24.vercel.app" 
+WEBAPP_URL = "https://apart24.uz" 
 
 def send_message(chat_id: str, text: str, reply_markup: dict = None):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
