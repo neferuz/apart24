@@ -18,7 +18,8 @@ import {
   ChevronRight,
   TrendingUp,
   Activity,
-  DoorOpen
+  DoorOpen,
+  ArrowUpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -62,6 +63,7 @@ export default function ComplexesPage() {
     address: "",
     lat: "",
     lng: "",
+    sort_order: "0",
     images: [] as string[]
   });
 
@@ -102,13 +104,14 @@ export default function ComplexesPage() {
         address: newComplex.address,
         lat: newComplex.lat,
         lng: newComplex.lng,
+        sort_order: parseInt(newComplex.sort_order || "0"),
         image: newComplex.images.length > 0 ? newComplex.images[0] : "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80"
       };
 
       const created = await api.createComplex(payload);
       setComplexes([created, ...complexes]);
       setIsAddDrawerOpen(false);
-      setNewComplex({ name: "", address: "", lat: "", lng: "", images: [] });
+      setNewComplex({ name: "", address: "", lat: "", lng: "", sort_order: "0", images: [] });
     } catch (error) {
       console.error("Failed to create complex:", error);
     }
@@ -315,15 +318,19 @@ export default function ComplexesPage() {
                        />
                     </div>
                     
-                    {/* Location Lat Lng */}
-                    <div className="grid grid-cols-2 gap-3 px-1 mt-1">
+                    {/* Location Lat Lng & Order */}
+                    <div className="grid grid-cols-3 gap-3 px-1 mt-1">
                        <div className="space-y-1.5">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Navigation className="size-3" /> Широта (LAT)</label>
-                          <input type="text" placeholder="41.311081" value={newComplex.lat} onChange={(e) => setNewComplex({...newComplex, lat: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Navigation className="size-3" /> LAT</label>
+                          <input type="text" placeholder="41.3110" value={newComplex.lat} onChange={(e) => setNewComplex({...newComplex, lat: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
                        </div>
                        <div className="space-y-1.5">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Navigation className="size-3" /> Долгота (LNG)</label>
-                          <input type="text" placeholder="69.240562" value={newComplex.lng} onChange={(e) => setNewComplex({...newComplex, lng: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Navigation className="size-3" /> LNG</label>
+                          <input type="text" placeholder="69.2405" value={newComplex.lng} onChange={(e) => setNewComplex({...newComplex, lng: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><ArrowUpCircle className="size-3" /> ПОРЯДОК</label>
+                          <input type="number" placeholder="0" value={newComplex.sort_order} onChange={(e) => setNewComplex({...newComplex, sort_order: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
                        </div>
                     </div>
                  </div>

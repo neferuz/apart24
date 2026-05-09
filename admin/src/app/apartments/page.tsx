@@ -77,6 +77,7 @@ export default function ApartmentsPage() {
     bathrooms: "",
     lat: "",
     lng: "",
+    sort_order: "0",
     images: [] as string[],
     amenities: [] as { id: number; name: string; icon: string }[]
   });
@@ -204,7 +205,8 @@ export default function ApartmentsPage() {
         image: newApartment.images.length > 0 ? newApartment.images[0] : "",
         images: JSON.stringify(newApartment.images),
         complex_id: parseInt(newApartment.complex_id),
-        amenities: JSON.stringify(newApartment.amenities)
+        amenities: JSON.stringify(newApartment.amenities),
+        sort_order: parseInt(newApartment.sort_order || "0")
       };
 
       const created = await api.createApartment(payload);
@@ -461,7 +463,7 @@ export default function ApartmentsPage() {
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 px-1 mt-1">
+                    <div className="grid grid-cols-3 gap-3 px-1 mt-1">
                        <div className="space-y-1.5">
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><CreditCard className="size-3" /> Сутки (СУМ)</label>
                           <input type="number" placeholder="4500000" value={newApartment.price} onChange={(e) => setNewApartment({...newApartment, price: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
@@ -469,6 +471,10 @@ export default function ApartmentsPage() {
                        <div className="space-y-1.5">
                           <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Users className="size-3" /> Гости</label>
                           <input type="number" placeholder="4" value={newApartment.guests} onChange={(e) => setNewApartment({...newApartment, guests: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><ArrowUpCircle className="size-3" /> Порядок</label>
+                          <input type="number" placeholder="0" value={newApartment.sort_order} onChange={(e) => setNewApartment({...newApartment, sort_order: e.target.value})} className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none tabular-nums focus:ring-1 focus:ring-primary/20 shadow-none" />
                        </div>
                     </div>
                  </div>

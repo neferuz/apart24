@@ -26,6 +26,7 @@ class Complex(Base):
     lat = Column(String, nullable=True)
     lng = Column(String, nullable=True)
     image = Column(String, nullable=True)
+    sort_order = Column(Integer, default=0)
     
     apartments = relationship("Apartment", back_populates="complex")
 
@@ -47,6 +48,7 @@ class Apartment(Base):
     image = Column(String, nullable=True)
     images = Column(String, nullable=True) # JSON list
     amenities = Column(String, nullable=True) # JSON list
+    sort_order = Column(Integer, default=0)
     
     complex = relationship("Complex", back_populates="apartments")
     bookings = relationship("Booking", back_populates="apartment")

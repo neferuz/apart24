@@ -7,6 +7,7 @@ class ComplexBase(BaseModel):
     lat: Optional[str] = None
     lng: Optional[str] = None
     image: Optional[str] = None
+    sort_order: Optional[int] = 0
 
 class ComplexCreate(ComplexBase):
     pass
@@ -17,6 +18,7 @@ class ComplexUpdate(BaseModel):
     lat: Optional[str] = None
     lng: Optional[str] = None
     image: Optional[str] = None
+    sort_order: Optional[int] = None
 
 class Complex(ComplexBase):
     id: int

@@ -6,7 +6,7 @@ def get_apartment(db: Session, apartment_id: int):
     return db.query(models.Apartment).filter(models.Apartment.id == apartment_id).first()
 
 def get_apartments(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Apartment).offset(skip).limit(limit).all()
+    return db.query(models.Apartment).order_by(models.Apartment.sort_order).offset(skip).limit(limit).all()
 
 def create_apartment(db: Session, apt: apartment.ApartmentCreate):
     db_apartment = models.Apartment(**apt.dict())

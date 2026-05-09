@@ -36,10 +36,15 @@ export default function WishlistPage() {
     <main className="min-h-screen bg-[#F5F5F7] select-none font-sans overflow-x-hidden relative">
       <div className="mx-auto max-w-md bg-[#F5F5F7] min-h-screen relative flex flex-col pb-24">
         
-        {/* HEADER (Matched with Trips Style) */}
-        <div className="bg-white/90 backdrop-blur-md rounded-b-[2rem] border-b border-slate-100 h-[70px] flex items-center justify-center sticky top-0 z-[50] mb-4">
-          <h1 className="text-[17px] font-black text-slate-600 tracking-tight">Вишлист</h1>
+        {/* HEADER (Fixed) */}
+        <div className="fixed top-0 left-0 right-0 z-[100] max-w-md mx-auto">
+          <div className="bg-white/90 backdrop-blur-md rounded-b-[2rem] border-b border-slate-100 h-[70px] flex items-center justify-center shadow-sm">
+            <h1 className="text-[17px] font-black text-slate-600 tracking-tight">Вишлист</h1>
+          </div>
         </div>
+
+        {/* Spacer for fixed header */}
+        <div className="h-[70px] mb-4" />
 
         {/* CONTENT */}
         <div className="flex-1">

@@ -17,6 +17,7 @@ class ApartmentBase(BaseModel):
     images: Optional[str] = None
     amenities: Optional[str] = None
     complex_id: Optional[int] = None
+    sort_order: Optional[int] = 0
 
 class ApartmentCreate(ApartmentBase):
     pass
@@ -37,6 +38,7 @@ class ApartmentUpdate(BaseModel):
     images: Optional[str] = None
     amenities: Optional[str] = None
     complex_id: Optional[int] = None
+    sort_order: Optional[int] = None
 
 class Apartment(ApartmentBase):
     id: int
