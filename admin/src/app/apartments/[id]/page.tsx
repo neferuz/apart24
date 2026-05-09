@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { compressImage } from "@/lib/utils";
 import { api } from "@/services/api";
 
 const ICON_OPTIONS = [
@@ -100,17 +101,26 @@ export default function ApartmentDetailsPage() {
   }, [isEditOpen, isFullscreenOpen]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        const res = await api.uploadImage(file);
-        setEditData((prev: any) => ({
-          ...prev,
-          imagesList: [...(prev.imagesList || []), res.url]
-        }));
-      } catch (error) {
-        console.error("Upload failed:", error);
-      }
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const compressed = await compressImage(file);
+        const res = await api.uploadImage(compressed);
+        return res.url;
+      });
+      
+      const uploadedUrls = await Promise.all(uploadPromises);
+      
+      setEditData((prev: any) => ({
+        ...prev,
+        imagesList: [...(prev.imagesList || []), ...uploadedUrls]
+      }));
+    } catch (error) {
+      console.error("Upload failed:", error);
+      setNotification({ type: 'error', message: 'Ошибка при загрузке фото' });
+      setTimeout(() => setNotification(null), 3000);
     }
   };
 
@@ -397,7 +407,7 @@ export default function ApartmentDetailsPage() {
                           <Camera className="size-6 group-hover:scale-110 transition-transform" />
                           <span className="text-[9px] font-black uppercase tracking-widest">Добавить фото</span>
                        </button>
-                       <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
+                       <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" multiple className="hidden" />
                     </div>
                  </div>
 

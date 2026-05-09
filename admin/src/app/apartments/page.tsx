@@ -25,6 +25,7 @@ import {
   Trees, TreePine, Flower2, Sofa, Monitor, Speaker, Gamepad2, Refrigerator, WashingMachine
 } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
+import { compressImage } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/services/api";
 
@@ -122,11 +123,27 @@ export default function ApartmentsPage() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setNewApartment({ ...newApartment, images: [...newApartment.images, url] });
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const compressed = await compressImage(file);
+        const res = await api.uploadImage(compressed);
+        return res.url;
+      });
+      
+      const uploadedUrls = await Promise.all(uploadPromises);
+      
+      setNewApartment(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls]
+      }));
+    } catch (error) {
+      console.error("Failed to upload images:", error);
+      setNotification({ type: 'error', message: 'Ошибка при загрузке фото' });
+      setTimeout(() => setNotification(null), 3000);
     }
   };
 
@@ -343,7 +360,7 @@ export default function ApartmentsPage() {
                        <button onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-1 hover:border-primary/20 transition-all text-slate-400 bg-slate-50/50 shadow-none">
                           <Plus className="size-4" />
                        </button>
-                       <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
+                       <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" multiple className="hidden" />
                     </div>
                  </div>
 
