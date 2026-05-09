@@ -21,7 +21,7 @@ export const api = {
   },
 
   // --- Clients & Bookings ---
-  async syncUser(userData: { tg_id: string; name: string; phone?: string }) {
+  async syncUser(userData: { tg_id: string; name: string; phone?: string; photo_url?: string }) {
     const res = await fetch(`${API_URL}/clients/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

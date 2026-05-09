@@ -8,6 +8,7 @@ class ClientBase(BaseModel):
     tg_id: str
     name: str
     phone: Optional[str] = None
+    photo_url: Optional[str] = None
 
 class ClientCreate(ClientBase):
     pass

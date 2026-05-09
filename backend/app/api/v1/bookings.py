@@ -16,7 +16,19 @@ def read_clients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
 def create_client(client: schemas.ClientCreate, db: Session = Depends(get_db)):
     db_client = crud.get_client_by_tg_id(db, tg_id=client.tg_id)
     if db_client:
+        changed = False
+        if client.name and client.name != db_client.name:
+            db_client.name = client.name
+            changed = True
+        if client.photo_url and client.photo_url != db_client.photo_url:
+            db_client.photo_url = client.photo_url
+            changed = True
+            
+        if changed:
+            db.commit()
+            db.refresh(db_client)
         return db_client
+        
     return crud.create_client(db=db, client=client)
 
 # --- BOOKINGS ---

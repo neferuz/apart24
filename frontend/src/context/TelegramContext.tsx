@@ -62,6 +62,7 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const synced = await api.syncUser({
           tg_id: activeUser!.id,
           name: `${activeUser!.first_name} ${activeUser!.last_name || ""}`.trim(),
+          photo_url: activeUser!.photo_url,
         });
         setDbUser(synced);
       } catch (error) {

@@ -57,6 +57,7 @@ class Client(Base):
     tg_id = Column(String, unique=True, index=True)
     name = Column(String)
     phone = Column(String, nullable=True)
+    photo_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     bookings = relationship("Booking", back_populates="client")

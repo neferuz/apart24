@@ -14,7 +14,12 @@ def get_clients(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Client).offset(skip).limit(limit).all()
 
 def create_client(db: Session, client: schemas.ClientCreate):
-    db_client = models.Client(**client.dict())
+    db_client = models.Client(
+        tg_id=client.tg_id,
+        name=client.name,
+        phone=client.phone,
+        photo_url=client.photo_url
+    )
     db.add(db_client)
     db.commit()
     db.refresh(db_client)
