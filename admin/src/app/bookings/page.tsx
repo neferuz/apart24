@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Search, 
   Calendar, 
@@ -34,6 +35,7 @@ const STATUS_MAP = {
 } as const;
 
 export default function BookingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [bookings, setBookings] = useState<any[]>([]);
@@ -168,8 +170,12 @@ export default function BookingsPage() {
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-2.5">
-                      <div className="size-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">
-                        {booking.client?.name?.[0]}
+                      <div className="size-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-100">
+                        {booking.client?.photo_url ? (
+                          <img src={booking.client.photo_url} className="size-full object-cover" />
+                        ) : (
+                          <span className="text-[10px] font-bold text-slate-600">{booking.client?.name?.[0]}</span>
+                        )}
                       </div>
                       <p className="text-[12px] font-black text-slate-900">{booking.client?.name}</p>
                     </div>
@@ -289,11 +295,23 @@ export default function BookingsPage() {
                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Информация о госте</p>
                      <div className="p-5 rounded-2xl border border-slate-100 bg-white">
                         <div className="flex items-center gap-4 mb-4">
-                           <div className="size-12 rounded-full bg-slate-900 flex items-center justify-center text-white text-[14px] font-black">
-                              {selectedBooking.client?.name?.[0]}
+                           <div className="size-12 rounded-full bg-slate-900 flex items-center justify-center overflow-hidden border border-slate-100 shadow-sm">
+                              {selectedBooking.client?.photo_url ? (
+                                <img src={selectedBooking.client.photo_url} className="size-full object-cover" />
+                              ) : (
+                                <span className="text-white text-[14px] font-black">{selectedBooking.client?.name?.[0]}</span>
+                              )}
                            </div>
-                           <div>
-                              <h4 className="text-[15px] font-black text-slate-900">{selectedBooking.client?.name}</h4>
+                           <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                 <h4 className="text-[15px] font-black text-slate-900">{selectedBooking.client?.name}</h4>
+                                 <button 
+                                   onClick={() => router.push(`/clients/${selectedBooking.client.id}`)}
+                                   className="text-[10px] font-black text-[#007AFF] uppercase tracking-widest hover:underline"
+                                 >
+                                    Профиль
+                                 </button>
+                              </div>
                               <p className="text-[11px] font-bold text-primary uppercase tracking-tight">Постоянный гость</p>
                            </div>
                         </div>
