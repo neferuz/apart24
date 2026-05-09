@@ -139,7 +139,7 @@ export default function ClientsPage() {
                   <td className="py-3 px-6" onClick={() => window.location.href = `/clients/${client.id}`}>
                     <div className="flex items-center gap-3">
                       <div className="size-10 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center shrink-0">
-                         <img src={client.avatar || `https://i.pravatar.cc/150?u=${client.id}`} alt={client.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                         <img src={client.photo_url || `https://i.pravatar.cc/150?u=${client.id}`} alt={client.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       </div>
                       <div>
                         <p className="text-[13px] font-black leading-none mb-1">{client.name}</p>
