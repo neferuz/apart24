@@ -288,11 +288,11 @@ export function PropertyClient() {
                 <span className="text-[13px] font-semibold">{property.address}</span>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-               <button className="h-[44px] w-[44px] rounded-full bg-[#F5F5F7] flex items-center justify-center text-slate-900 border border-slate-100 active:scale-95 transition-transform">
-                 <Phone className="h-5 w-5" strokeWidth={1.5} />
-               </button>
-            </div>
+             <div className="flex items-center gap-1.5 shrink-0">
+                <a href="tel:+998935653801" className="h-[44px] w-[44px] rounded-full bg-[#F5F5F7] flex items-center justify-center text-slate-900 border border-slate-100 active:scale-95 transition-transform">
+                  <Phone className="h-5 w-5" strokeWidth={1.5} />
+                </a>
+             </div>
           </div>
 
           <div className="grid grid-cols-4 gap-2 mb-8">

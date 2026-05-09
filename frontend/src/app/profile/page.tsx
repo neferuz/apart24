@@ -373,7 +373,7 @@ export default function ProfilePage() {
 
                   <div className="grid grid-cols-1 gap-3">
                     <a 
-                      href="https://t.me/apart24_support" 
+                      href="https://t.me/apart24support" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center justify-between p-4 bg-[#0088cc]/5 border border-[#0088cc]/10 rounded-[1.5rem] active:scale-[0.98] transition-all group"
@@ -461,7 +461,7 @@ export default function ProfilePage() {
 
                   <div className="pt-1">
                     <a 
-                      href="https://t.me/apart24_support" 
+                      href="https://t.me/apart24support" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="w-full h-12 bg-slate-900 text-white rounded-[1.15rem] text-[13px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10"
