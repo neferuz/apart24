@@ -49,7 +49,7 @@ def send_welcome(chat_id: str):
             [
                 {
                     "text": "📱 Наш канал",
-                    "url": "https://t.me/apart24_channel"
+                    "url": "https://t.me/apart24uz"
                 }
             ]
         ]
