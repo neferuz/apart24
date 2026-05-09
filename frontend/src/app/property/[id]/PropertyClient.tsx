@@ -404,13 +404,18 @@ export function PropertyClient() {
                         <div className="flex flex-col"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Объект</span><span className="text-[15px] font-black text-slate-800 truncate">{property.title}</span></div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex flex-col justify-between"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Даты</span><div className="flex items-center justify-between gap-2"><span className="text-[13px] font-black text-slate-800">{startDate} - {endDate} мая</span><button onClick={() => { setIsConfirmOpen(false); setIsLocalDateOpen(true); }} className="text-[9px] font-black text-[#007AFF] uppercase underline">Изм.</button></div></div>
+                        <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex flex-col justify-between"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Даты</span><div className="flex items-center justify-between gap-2"><span className="text-[13px] font-black text-slate-800">{startDate}{endDate ? ` - ${endDate}` : ""} мая</span><button onClick={() => { setIsConfirmOpen(false); setIsLocalDateOpen(true); }} className="text-[9px] font-black text-[#007AFF] uppercase underline">Изм.</button></div></div>
                         <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex flex-col justify-between"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Гости</span><div className="flex items-center justify-between gap-2"><span className="text-[13px] font-black text-slate-800">{adults + kids} чел.</span><button onClick={() => { setIsConfirmOpen(false); setIsLocalGuestOpen(true); }} className="text-[9px] font-black text-[#007AFF] uppercase underline">Изм.</button></div></div>
                       </div>
-                      <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex items-center justify-between">
-                         <span className="text-[14px] font-black text-slate-900">Итого за {Math.max(1, (endDate || 0) - (startDate || 0))} ночи</span>
-                         <span className="text-[16px] font-black text-[#007AFF]">{formatNumber(property.price * Math.max(1, (endDate || 0) - (startDate || 0)))} сум</span>
-                      </div>
+                      {(() => {
+                        const nights = (startDate && endDate) ? Math.max(1, endDate - startDate) : 1;
+                        return (
+                          <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex items-center justify-between">
+                            <span className="text-[14px] font-black text-slate-900">Итого за {nights} ночи</span>
+                            <span className="text-[16px] font-black text-[#007AFF]">{formatNumber(property.price * nights)} сум</span>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <button onClick={confirmBooking} disabled={isBookingLoading} className="w-full h-14 bg-[#007AFF] text-white rounded-[1.25rem] text-[15px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-blue-500/30">
                       {isBookingLoading ? <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Забронировать"}
