@@ -22,7 +22,7 @@ class Client(ClientBase):
 
 class BookingBase(BaseModel):
     apartment_id: Optional[int] = None
-    client_id: int
+    client_id: Optional[int] = None
     check_in: datetime
     check_out: datetime
     total_price: float
