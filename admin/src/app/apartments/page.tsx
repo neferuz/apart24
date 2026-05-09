@@ -172,7 +172,21 @@ export default function ApartmentsPage() {
   };
 
   const handleAddApartment = async () => {
-    if (!newApartment.title || !newApartment.price || !newApartment.complex_id) return;
+    if (!newApartment.title) {
+      setNotification({ type: 'error', message: 'Введите название объекта' });
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+    if (!newApartment.price) {
+      setNotification({ type: 'error', message: 'Введите цену' });
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+    if (!newApartment.complex_id) {
+      setNotification({ type: 'error', message: 'Выберите жилой комплекс' });
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
 
     try {
       const payload = {
@@ -211,6 +225,7 @@ export default function ApartmentsPage() {
         amenities: []
       });
       setNotification({ type: 'success', message: 'Квартира успешно добавлена в базу!' });
+      setIsAddOpen(false);
       setTimeout(() => setNotification(null), 3000);
     } catch (error) {
       console.error("Failed to create apartment:", error);
