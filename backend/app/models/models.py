@@ -61,6 +61,7 @@ class Client(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     bookings = relationship("Booking", back_populates="client")
+    notifications = relationship("Notification", back_populates="client")
 
 class Booking(Base):
     __tablename__ = "bookings"
@@ -76,3 +77,15 @@ class Booking(Base):
     
     apartment = relationship("Apartment", back_populates="bookings")
     client = relationship("Client", back_populates="bookings")
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id"))
+    title = Column(String)
+    message = Column(String)
+    type = Column(String, default="info") # info, success, warning, error
+    is_read = Column(Integer, default=0) # 0 = unread, 1 = read
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    client = relationship("Client", back_populates="notifications")

@@ -30,60 +30,40 @@ export default function NotificationsPage() {
     const loadNotifications = async () => {
       if (!dbUser?.id) return;
       try {
-        const [bookings, apartments] = await Promise.all([
-          api.getUserBookings(dbUser.id),
-          api.getApartments()
-        ]);
+        const data = await api.getNotifications(dbUser.id);
 
-        const mapped = bookings.map((b: any) => {
-          const apt = apartments.find((a: any) => a.id === b.apartment_id);
-          const status = b.status?.toLowerCase();
-          
-          let title = "Уведомление по брони";
-          let message = `Ваша бронь в ${apt?.title || 'апартаменты'} #${b.id}`;
+        const mapped = data.map((n: any) => {
           let icon = Bell;
           let color = "text-slate-400";
           let bg = "bg-slate-50";
 
-          if (status === 'pending' || status === 'wait') {
-            title = "Заявка в обработке";
-            message = `Ваша заявка #${b.id} в ${apt?.title} принята. Ждем подтверждения.`;
-            icon = Clock;
-            color = "text-amber-500";
-            bg = "bg-amber-50";
-          } else if (status === 'confirmed' || status === 'active') {
-            title = "Бронь подтверждена!";
-            message = `Отличные новости! Ваша бронь #${b.id} в ${apt?.title} успешно подтверждена.`;
+          if (n.type === 'success') {
             icon = CheckCircle2;
             color = "text-emerald-500";
             bg = "bg-emerald-50";
-          } else if (status === 'cancelled') {
-            title = "Бронирование отменено";
-            message = `Бронирование #${b.id} в ${apt?.title} было отменено.`;
+          } else if (n.type === 'error') {
             icon = XCircle;
             color = "text-rose-500";
             bg = "bg-rose-50";
-          } else if (status === 'done') {
-            title = "Поездка завершена";
-            message = `Надеемся, вам понравилось в ${apt?.title}! Будем рады видеть вас снова.`;
-            icon = Sparkles;
-            color = "text-blue-500";
-            bg = "bg-blue-50";
+          } else if (n.type === 'warning') {
+            icon = Clock;
+            color = "text-amber-500";
+            bg = "bg-amber-50";
           }
 
           return {
-            id: b.id,
-            title,
-            message,
-            time: b.created_at,
+            id: n.id,
+            title: n.title,
+            message: n.message,
+            time: n.created_at,
             icon,
             color,
             bg,
-            isUnread: status === 'confirmed' // Mark confirmed as "new/important"
+            isUnread: n.is_read === 0
           };
         });
 
-        setNotifications(mapped.sort((a: any, b: any) => b.id - a.id));
+        setNotifications(mapped);
       } catch (error) {
         console.error("Failed to load notifications:", error);
       } finally {

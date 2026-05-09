@@ -68,5 +68,19 @@ export const api = {
       console.error("Error fetching user bookings:", err);
       throw err;
     }
+  },
+
+  // --- Notifications ---
+  async getNotifications(clientId: number) {
+    const res = await fetch(`${API_URL}/notifications/${clientId}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch notifications');
+    return res.json();
+  },
+
+  async deleteNotification(notificationId: number) {
+    const res = await fetch(`${API_URL}/notifications/${notificationId}`, {
+      method: 'DELETE',
+    });
+    return res.json();
   }
 };

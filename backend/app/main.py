@@ -29,7 +29,7 @@ app.add_middleware(
 
 app.mount("/api/v1/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-from app.api.v1 import apartments, complexes, bookings, dashboard, upload, bot
+from app.api.v1 import apartments, complexes, bookings, dashboard, upload, bot, notifications
 
 app.include_router(apartments.router, prefix="/api/v1/apartments", tags=["apartments"])
 app.include_router(complexes.router, prefix="/api/v1/complexes", tags=["complexes"])
@@ -37,6 +37,7 @@ app.include_router(bookings.router, prefix="/api/v1", tags=["bookings/clients"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(upload.router, prefix="/api/v1/upload", tags=["upload"])
 app.include_router(bot.router, prefix="/api/v1/bot", tags=["bot"])
+app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["notifications"])
 
 @app.get("/")
 def read_root():

@@ -4,6 +4,8 @@ from typing import List
 from app.db.session import get_db
 from app.schemas import booking as schemas
 from app.crud import booking as crud
+from app.crud import notification as crud_notif
+from app.schemas import notification as notif_schemas
 
 router = APIRouter()
 
@@ -45,11 +47,53 @@ def read_bookings(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 @router.post("/bookings/", response_model=schemas.Booking)
 def create_booking(booking: schemas.BookingCreate, db: Session = Depends(get_db)):
-    return crud.create_booking(db=db, booking=booking)
+    db_booking = crud.create_booking(db=db, booking=booking)
+    
+    # Create notification for new booking
+    try:
+        crud_notif.create_notification(db, notif_schemas.NotificationCreate(
+            client_id=db_booking.client_id,
+            title="Заявка принята",
+            message=f"Ваша заявка #{db_booking.id} принята и ожидает подтверждения.",
+            type="info"
+        ))
+    except Exception as e:
+        print(f"Failed to create notification: {e}")
+        
+    return db_booking
 
 @router.put("/bookings/{booking_id}/status", response_model=schemas.Booking)
 def update_booking_status(booking_id: int, status: str, db: Session = Depends(get_db)):
     db_booking = crud.update_booking_status(db, booking_id=booking_id, status=status)
     if db_booking is None:
         raise HTTPException(status_code=404, detail="Booking not found")
+        
+    # Create notification for status change
+    try:
+        title = "Статус брони изменен"
+        message = f"Статус вашей брони #{booking_id} изменен на: {status}"
+        notif_type = "info"
+        
+        if status == "confirmed":
+            title = "Бронь подтверждена!"
+            message = f"Ваша бронь #{booking_id} успешно подтверждена. Ждем вас!"
+            notif_type = "success"
+        elif status == "cancelled":
+            title = "Бронь отменена"
+            message = f"К сожалению, ваша бронь #{booking_id} была отменена."
+            notif_type = "error"
+        elif status == "done":
+            title = "Поездка завершена"
+            message = f"Надеемся, вам все понравилось! Будем рады видеть вас снова."
+            notif_type = "success"
+            
+        crud_notif.create_notification(db, notif_schemas.NotificationCreate(
+            client_id=db_booking.client_id,
+            title=title,
+            message=message,
+            type=notif_type
+        ))
+    except Exception as e:
+        print(f"Failed to create notification: {e}")
+        
     return db_booking
