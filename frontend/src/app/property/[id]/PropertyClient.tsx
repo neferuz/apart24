@@ -152,7 +152,7 @@ export function PropertyClient() {
     try {
       const checkIn = new Date(2026, 4, startDate);
       const checkOut = new Date(2026, 4, endDate);
-      const days = endDate - startDate;
+      const days = Math.max(1, (endDate || 0) - (startDate || 0));
       
       const totalGuests = (Number(adults) || 2) + (Number(kids) || 0);
       
@@ -408,8 +408,8 @@ export function PropertyClient() {
                         <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex flex-col justify-between"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Гости</span><div className="flex items-center justify-between gap-2"><span className="text-[13px] font-black text-slate-800">{adults + kids} чел.</span><button onClick={() => { setIsConfirmOpen(false); setIsLocalGuestOpen(true); }} className="text-[9px] font-black text-[#007AFF] uppercase underline">Изм.</button></div></div>
                       </div>
                       <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex items-center justify-between">
-                         <span className="text-[14px] font-black text-slate-900">Итого за {endDate! - startDate!} ночи</span>
-                         <span className="text-[16px] font-black text-[#007AFF]">{formatNumber(property.price * (endDate! - startDate!))} сум</span>
+                         <span className="text-[14px] font-black text-slate-900">Итого за {Math.max(1, (endDate || 0) - (startDate || 0))} ночи</span>
+                         <span className="text-[16px] font-black text-[#007AFF]">{formatNumber(property.price * Math.max(1, (endDate || 0) - (startDate || 0)))} сум</span>
                       </div>
                     </div>
                     <button onClick={confirmBooking} disabled={isBookingLoading} className="w-full h-14 bg-[#007AFF] text-white rounded-[1.25rem] text-[15px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-blue-500/30">
@@ -447,7 +447,18 @@ export function PropertyClient() {
                     <button key={day} onClick={() => handleDateClick(day)} className={cn("h-11 w-full rounded-xl text-[13px] font-black transition-all relative", isSelected(day) ? "bg-[#007AFF] text-white" : isRange(day) ? "bg-[#007AFF]/5 text-[#007AFF]" : "text-slate-600 hover:bg-slate-50")}>{day}</button>
                   ))}
                 </div>
-                <button onClick={() => { setIsLocalDateOpen(false); setIsConfirmOpen(true); }} className="w-full h-14 bg-slate-900 text-white rounded-[1.25rem] text-[14px] font-black uppercase tracking-widest">Готово</button>
+                <button onClick={() => { 
+                  if (!startDate) {
+                    alert("Пожалуйста, выберите дату заезда");
+                    return;
+                  }
+                  if (!endDate) {
+                    alert("Пожалуйста, выберите дату выезда");
+                    return;
+                  }
+                  setIsLocalDateOpen(false); 
+                  setIsConfirmOpen(true); 
+                }} className="w-full h-14 bg-slate-900 text-white rounded-[1.25rem] text-[14px] font-black uppercase tracking-widest">Готово</button>
               </motion.div>
             </>
           )}
