@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -49,6 +49,12 @@ export function PropertyModalClient() {
   const [selectingPhase, setSelectingPhase] = useState<'start' | 'end'>('start');
   const [relatedApartments, setRelatedApartments] = useState<any[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [datePickerMessage, setDatePickerMessage] = useState<string | null>(null);
+
+  const nights = useMemo(() => {
+    if (!startDate || !endDate) return 1;
+    return Math.max(1, Number(endDate) - Number(startDate));
+  }, [startDate, endDate]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -72,7 +78,7 @@ export function PropertyModalClient() {
         setComplex(comp);
 
         const allApts = await api.getApartments();
-        setRelatedApartments(allApts.filter((a: any) => a.complex_id === propData.complex_id && a.id !== propData.id));
+        setRelatedApartments(allApts.filter((a: any) => String(a.complex_id) === String(propData.complex_id) && a.id !== propData.id));
       } catch (error) {
         console.error("Failed to load property:", error);
       } finally {
@@ -105,8 +111,6 @@ export function PropertyModalClient() {
     );
   }
 
-
-
   const MONTHS = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
   const daysInMonth = currentMonthIndex === 1 ? 28 : (currentMonthIndex % 2 === 0 ? 31 : 30);
   const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -119,14 +123,17 @@ export function PropertyModalClient() {
       setStartDate(day);
       setEndDate(null);
       setSelectingPhase('end');
+      setDatePickerMessage("Теперь выберите дату выезда");
     } else {
       if (startDate && day < startDate) {
         setStartDate(day);
         setEndDate(null);
         setSelectingPhase('end');
+        setDatePickerMessage("Теперь выберите дату выезда");
       } else {
         setEndDate(day);
         setSelectingPhase('start');
+        setDatePickerMessage(null);
       }
     }
   };
@@ -142,7 +149,13 @@ export function PropertyModalClient() {
   };
 
   const handleBook = async () => {
-    if (!startDate || !endDate) {
+    if (!startDate) {
+      setDatePickerMessage("Выберите дату заезда");
+      setIsLocalDateOpen(true);
+      return;
+    }
+    if (!endDate) {
+      setDatePickerMessage("Выберите дату выезда");
       setIsLocalDateOpen(true);
       return;
     }
@@ -157,9 +170,8 @@ export function PropertyModalClient() {
     }
     setIsBookingLoading(true);
     try {
-      const checkIn = new Date(2026, 4, startDate);
-      const checkOut = new Date(2026, 4, endDate);
-      const days = endDate - startDate;
+      const checkIn = new Date(2026, 4, Number(startDate));
+      const checkOut = new Date(2026, 4, Number(endDate));
       
       const totalGuests = (Number(adults) || 2) + (Number(kids) || 0);
       
@@ -168,7 +180,7 @@ export function PropertyModalClient() {
         client_id: dbUser.id,
         check_in: checkIn.toISOString(),
         check_out: checkOut.toISOString(),
-        total_price: property.price * days,
+        total_price: property.price * nights,
         status: "pending",
         guests: totalGuests,
         guests_count: totalGuests,
@@ -177,10 +189,6 @@ export function PropertyModalClient() {
         payment_method: "Tashkent"
       });
       setIsBookingSuccess(true);
-      // Wait for success screen to show
-      setTimeout(() => {
-        // Redirection is now handled by the "Готово" button in the UI
-      }, 1500);
     } catch (error) {
       console.error("Failed to create booking:", error);
       alert("Ошибка при создании бронирования. Попробуйте еще раз.");
@@ -188,7 +196,6 @@ export function PropertyModalClient() {
       setIsBookingLoading(false);
     }
   };
-  const isLiked = !!liked[property.id];
 
   let amenitiesDisplay: any[] = [];
   try {
@@ -212,12 +219,18 @@ export function PropertyModalClient() {
       >
         {/* Header */}
         <div className={`absolute top-0 left-0 right-0 z-[10001] px-5 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-100 pt-4 pb-4' : 'bg-transparent pt-10 pb-4'}`}>
-          <button onClick={() => router.back()} className="h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white border border-slate-100 text-slate-900">
+          <button onClick={() => router.back()} className="h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white border border-slate-100 text-slate-900 shadow-sm active:scale-95 transition-transform">
             <ChevronLeft className="h-6 w-6 ml-[-2px]" strokeWidth={1} />
           </button>
           <div className="flex items-center gap-2">
-             <button className="h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white border border-slate-100 text-slate-900">
+             <button className="h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white border border-slate-100 text-slate-900 shadow-sm">
                <Upload className="h-5 w-5" strokeWidth={1.5} />
+             </button>
+             <button 
+              onClick={() => toggleLike(property.id)} 
+              className="h-[40px] w-[40px] rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm"
+             >
+                <Heart className={cn("h-5 w-5", liked[property.id] ? "fill-rose-500 text-rose-500" : "text-slate-900")} strokeWidth={1.5} />
              </button>
           </div>
         </div>
@@ -238,7 +251,6 @@ export function PropertyModalClient() {
                ))}
             </div>
             
-            {/* Floating Thumbnails Preview */}
             {imagesList.length > 1 && (
                <div className="absolute bottom-16 left-0 right-0 z-20">
                   <div className="flex gap-2 px-5 py-2 overflow-x-auto snap-x snap-mandatory no-scrollbar w-full justify-center">
@@ -266,7 +278,6 @@ export function PropertyModalClient() {
                </div>
             )}
             
-            {/* Gallery Indicator Dots */}
             {imagesList.length > 1 && (
                <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-1.5 z-10">
                   {imagesList.map((_, idx) => (
@@ -282,7 +293,7 @@ export function PropertyModalClient() {
             )}
           </div>
 
-          <div className="relative -mt-10 bg-white rounded-t-[2.5rem] px-5 pt-10 pb-32">
+          <div className="relative -mt-10 bg-white rounded-t-[2.5rem] px-5 pt-10 pb-32 min-h-full">
             <div className="flex justify-between items-start mb-6">
               <div className="pr-3">
                 {complex && (
@@ -297,7 +308,7 @@ export function PropertyModalClient() {
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                 <button className="h-[44px] w-[44px] rounded-full bg-[#F5F5F7] flex items-center justify-center text-slate-900">
+                 <button className="h-[44px] w-[44px] rounded-full bg-[#F5F5F7] flex items-center justify-center text-slate-900 border border-slate-100 active:scale-95 transition-transform">
                    <Phone className="h-5 w-5" strokeWidth={1.5} />
                  </button>
               </div>
@@ -346,18 +357,16 @@ export function PropertyModalClient() {
               </div>
             )}
 
-            <div className="mt-8 pt-8 border-t border-slate-100">
-               <h3 className="text-[18px] font-black text-slate-600 mb-4">Локация</h3>
-               <div className="relative h-[200px] w-full rounded-[2.5rem] overflow-hidden bg-slate-50 border border-slate-100">
-                  <iframe width="100%" height="100%" frameBorder="0" src={`https://maps.google.com/maps?q=${property.lat || property.address},${property.lng || ""}&t=&z=14&ie=UTF8&iwloc=&output=embed`}></iframe>
-               </div>
-            </div>
-
+            {relatedApartments.length > 0 && (
+              <div className="mt-8 pt-8 border-t border-slate-100">
+                 <ApartmentList title="Другие в этом ЖК" items={relatedApartments} />
+              </div>
+            )}
           </div>
         </div>
 
         <div className="absolute bottom-6 left-0 right-0 z-[10002] px-6 flex justify-center pointer-events-none">
-          <div className="w-full max-w-[340px] bg-white h-[64px] rounded-[2rem] px-2 pl-6 pr-2 flex items-center justify-between border border-slate-100 pointer-events-auto">
+          <div className="w-full max-w-[340px] bg-white h-[64px] rounded-[2rem] px-2 pl-6 pr-2 flex items-center justify-between border border-slate-100 pointer-events-auto shadow-2xl shadow-slate-200/50">
             <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Сутки</span>
                 <span className="text-[16px] font-black text-slate-800 tracking-tight">{formatNumber(property.price)} сум</span>
@@ -366,8 +375,8 @@ export function PropertyModalClient() {
               onClick={handleBook}
               disabled={isBookingSuccess}
               className={cn(
-                "h-[48px] px-8 rounded-[1.5rem] text-[13px] font-black active:scale-95 transition-all flex items-center justify-center",
-                isBookingSuccess ? "bg-emerald-500 text-white" : "bg-[#007AFF] text-white"
+                "h-[48px] px-8 rounded-[1.5rem] text-[13px] font-black active:scale-95 transition-all flex items-center justify-center shadow-lg",
+                isBookingSuccess ? "bg-emerald-500 text-white shadow-emerald-200" : "bg-[#007AFF] text-white shadow-blue-200"
               )}
             >
               {isBookingSuccess ? <CheckCircle2 className="size-5" /> : "Забронировать"}
@@ -443,28 +452,29 @@ export function PropertyModalClient() {
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Booking Confirmation Modal */}
       <AnimatePresence>
-        {isConfirmOpen && (
+        {isConfirmOpen && startDate && endDate && (
           <>
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
               onClick={() => setIsConfirmOpen(false)} 
-              className="fixed inset-0 z-[30000] bg-black/60 backdrop-blur-md" 
+              className="fixed inset-0 z-[30000] bg-black/60 backdrop-blur-md pointer-events-auto" 
             />
             <motion.div 
               initial={{ y: "100%" }} 
               animate={{ y: 0 }} 
               exit={{ y: "100%" }} 
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[30001] max-w-md mx-auto bg-white rounded-t-[2.5rem] p-6 pb-12 border-t border-slate-100"
+              className="fixed bottom-0 left-0 right-0 z-[30001] max-w-md mx-auto bg-white rounded-t-[2.5rem] p-6 pb-12 border-t border-slate-100 pointer-events-auto shadow-2xl"
             >
               {!isBookingSuccess ? (
                 <>
                   <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-[20px] font-black text-slate-900">Подтверждение брони</h3>
+                    <h3 className="text-[20px] font-black text-slate-900">Подтверждение</h3>
                     <button onClick={() => setIsConfirmOpen(false)} className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 active:scale-90 transition-transform">
                       <X className="h-5 w-5" />
                     </button>
@@ -482,7 +492,7 @@ export function PropertyModalClient() {
                       <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex flex-col justify-between">
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Даты</span>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[13px] font-black text-slate-800">{startDate} - {endDate} мая</span>
+                          <span className="text-[13px] font-black text-slate-800">{startDate}{endDate ? ` - ${endDate}` : ""} мая</span>
                           <button onClick={() => { setIsConfirmOpen(false); setIsLocalDateOpen(true); }} className="text-[9px] font-black text-[#007AFF] uppercase underline">Изм.</button>
                         </div>
                       </div>
@@ -495,22 +505,16 @@ export function PropertyModalClient() {
                       </div>
                     </div>
 
-                    <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[12px] font-bold text-slate-500">Стоимость за сутки</span>
-                        <span className="text-[12px] font-black text-slate-800">{formatNumber(property.price)} сум</span>
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-200">
-                        <span className="text-[14px] font-black text-slate-900">Итого за {endDate! - startDate!} ночи</span>
-                        <span className="text-[16px] font-black text-[#007AFF] tracking-tight">{formatNumber(property.price * (endDate! - startDate!))} сум</span>
-                      </div>
+                    <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex items-center justify-between">
+                       <span className="text-[14px] font-black text-slate-900">Итого за {nights} ночи</span>
+                       <span className="text-[16px] font-black text-[#007AFF] tracking-tight">{formatNumber(property.price * nights)} сум</span>
                     </div>
                   </div>
 
                   <button 
                     onClick={confirmBooking}
                     disabled={isBookingLoading}
-                    className="w-full h-14 bg-[#007AFF] text-white rounded-[1.25rem] text-[15px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center disabled:opacity-50"
+                    className="w-full h-14 bg-[#007AFF] text-white rounded-[1.25rem] text-[15px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center disabled:opacity-50 shadow-lg shadow-blue-500/30"
                   >
                     {isBookingLoading ? (
                       <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -541,32 +545,11 @@ export function PropertyModalClient() {
                     </p>
                   </motion.div>
 
-                  {/* Summary Card */}
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="w-full bg-slate-50 rounded-[2rem] p-4 mb-8 border border-slate-100 flex items-center gap-4"
-                  >
-                    <div className="size-16 rounded-2xl overflow-hidden relative shrink-0">
-                      <Image src={imagesList[0]} alt={property.title} fill className="object-cover" />
-                    </div>
-                    <div className="text-left flex-1 min-w-0">
-                      <h4 className="text-[14px] font-black text-slate-800 truncate">{property.title}</h4>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[11px] font-bold text-slate-500">{startDate} - {endDate} мая</span>
-                        <span className="text-[11px] font-black text-[#007AFF]">{formatNumber(property.price * (endDate! - startDate!))} сум</span>
-                      </div>
-                    </div>
-                  </motion.div>
-
                   <motion.button 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                     onClick={() => {
-                      // We use router.back() to dismiss the intercepted route (modal)
-                      // Then we navigate to trips. This is the cleanest way to clear @modal.
                       router.back();
                       setTimeout(() => {
                         router.push('/trips');
@@ -582,15 +565,21 @@ export function PropertyModalClient() {
           </>
         )}
       </AnimatePresence>
+
       {/* Date Picker Modal */}
       <AnimatePresence>
         {isLocalDateOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsLocalDateOpen(false)} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[40000]" />
-            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2.5rem] z-[40001] p-6 pb-10 shadow-2xl" >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setIsLocalDateOpen(false); setDatePickerMessage(null); }} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[40000] pointer-events-auto" />
+            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2.5rem] z-[40001] p-6 pb-10 shadow-2xl pointer-events-auto" >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-[18px] font-black text-slate-900">Выберите даты</h3>
-                <button onClick={() => setIsLocalDateOpen(false)} className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><X className="h-4 w-4" /></button>
+                <div className="flex flex-col">
+                  <h3 className="text-[18px] font-black text-slate-900">Выберите даты</h3>
+                  {datePickerMessage && (
+                    <span className="text-[12px] font-bold text-[#007AFF] animate-pulse">{datePickerMessage}</span>
+                  )}
+                </div>
+                <button onClick={() => { setIsLocalDateOpen(false); setDatePickerMessage(null); }} className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><X className="h-4 w-4" /></button>
               </div>
               
               <div className="flex items-center justify-between mb-4 px-2">
@@ -619,7 +608,19 @@ export function PropertyModalClient() {
                 ))}
               </div>
 
-              <button onClick={() => { setIsLocalDateOpen(false); setIsConfirmOpen(true); }} className="w-full h-14 bg-slate-900 text-white rounded-[1.25rem] text-[14px] font-black uppercase tracking-widest">Готово</button>
+              <button onClick={() => { 
+                if (!startDate) {
+                  setDatePickerMessage("Пожалуйста, выберите дату заезда");
+                  return;
+                }
+                if (!endDate) {
+                  setDatePickerMessage("Пожалуйста, выберите дату выезда");
+                  return;
+                }
+                setIsLocalDateOpen(false); 
+                setDatePickerMessage(null);
+                setIsConfirmOpen(true); 
+              }} className="w-full h-14 bg-slate-900 text-white rounded-[1.25rem] text-[14px] font-black uppercase tracking-widest">Готово</button>
             </motion.div>
           </>
         )}
@@ -629,8 +630,8 @@ export function PropertyModalClient() {
       <AnimatePresence>
         {isLocalGuestOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsLocalGuestOpen(false)} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[40000]" />
-            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2.5rem] z-[40001] p-6 pb-10 shadow-2xl" >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsLocalGuestOpen(false)} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[40000] pointer-events-auto" />
+            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2.5rem] z-[40001] p-6 pb-10 shadow-2xl pointer-events-auto" >
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-[18px] font-black text-slate-900">Количество гостей</h3>
                 <button onClick={() => setIsLocalGuestOpen(false)} className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><X className="h-4 w-4" /></button>
