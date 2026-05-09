@@ -3,7 +3,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1
 export const api = {
   // --- Complexes ---
   async getComplexes() {
-    const res = await fetch(`${API_URL}/complexes/`);
+    const res = await fetch(`${API_URL}/complexes/`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch complexes');
     return res.json();
   },
@@ -35,7 +35,7 @@ export const api = {
 
   // --- Apartments ---
   async getApartments() {
-    const res = await fetch(`${API_URL}/apartments/`);
+    const res = await fetch(`${API_URL}/apartments/`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch apartments');
     return res.json();
   },
@@ -101,7 +101,7 @@ export const api = {
 
   // --- Clients ---
   async getClients() {
-    const res = await fetch(`${API_URL}/clients/`);
+    const res = await fetch(`${API_URL}/clients/`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch clients');
     return res.json();
   },
@@ -125,7 +125,7 @@ export const api = {
 
   // --- Dashboard ---
   async getStats() {
-    const res = await fetch(`${API_URL}/dashboard/stats`);
+    const res = await fetch(`${API_URL}/dashboard/stats`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch stats');
     return res.json();
   },
