@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -49,6 +49,11 @@ export function PropertyClient() {
   const [selectingPhase, setSelectingPhase] = useState<'start' | 'end'>('start');
   const [relatedApartments, setRelatedApartments] = useState<any[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const nights = useMemo(() => {
+    if (!startDate || !endDate) return 1;
+    return Math.max(1, Number(endDate) - Number(startDate));
+  }, [startDate, endDate]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -152,8 +157,6 @@ export function PropertyClient() {
     try {
       const checkIn = new Date(2026, 4, startDate);
       const checkOut = new Date(2026, 4, endDate);
-      const days = Math.max(1, (endDate || 0) - (startDate || 0));
-      
       const totalGuests = (Number(adults) || 2) + (Number(kids) || 0);
       
       await api.createBooking({
@@ -161,7 +164,7 @@ export function PropertyClient() {
         client_id: dbUser.id,
         check_in: checkIn.toISOString(),
         check_out: checkOut.toISOString(),
-        total_price: property.price * days,
+        total_price: property.price * nights,
         status: "pending",
         guests: totalGuests,
         guests_count: totalGuests,
@@ -389,7 +392,7 @@ export function PropertyClient() {
 
         {/* Confirmation Modal */}
         <AnimatePresence>
-          {isConfirmOpen && (
+          {isConfirmOpen && startDate && endDate && (
             <>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsConfirmOpen(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md pointer-events-auto" />
               <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2.5rem] p-6 pb-12 border-t border-slate-100 pointer-events-auto shadow-2xl" >
@@ -407,15 +410,10 @@ export function PropertyClient() {
                         <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex flex-col justify-between"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Даты</span><div className="flex items-center justify-between gap-2"><span className="text-[13px] font-black text-slate-800">{startDate}{endDate ? ` - ${endDate}` : ""} мая</span><button onClick={() => { setIsConfirmOpen(false); setIsLocalDateOpen(true); }} className="text-[9px] font-black text-[#007AFF] uppercase underline">Изм.</button></div></div>
                         <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex flex-col justify-between"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Гости</span><div className="flex items-center justify-between gap-2"><span className="text-[13px] font-black text-slate-800">{adults + kids} чел.</span><button onClick={() => { setIsConfirmOpen(false); setIsLocalGuestOpen(true); }} className="text-[9px] font-black text-[#007AFF] uppercase underline">Изм.</button></div></div>
                       </div>
-                      {(() => {
-                        const nights = (startDate && endDate) ? Math.max(1, endDate - startDate) : 1;
-                        return (
-                          <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex items-center justify-between">
-                            <span className="text-[14px] font-black text-slate-900">Итого за {nights} ночи</span>
-                            <span className="text-[16px] font-black text-[#007AFF]">{formatNumber(property.price * nights)} сум</span>
-                          </div>
-                        );
-                      })()}
+                      <div className="p-4 bg-slate-50 rounded-[1.75rem] border border-slate-100 flex items-center justify-between">
+                         <span className="text-[14px] font-black text-slate-900">Итого за {nights} ночи</span>
+                         <span className="text-[16px] font-black text-[#007AFF]">{formatNumber(property.price * nights)} сум</span>
+                      </div>
                     </div>
                     <button onClick={confirmBooking} disabled={isBookingLoading} className="w-full h-14 bg-[#007AFF] text-white rounded-[1.25rem] text-[15px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-blue-500/30">
                       {isBookingLoading ? <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Забронировать"}
