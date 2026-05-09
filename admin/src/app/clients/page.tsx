@@ -139,7 +139,7 @@ export default function ClientsPage() {
                   <td className="py-3 px-6" onClick={() => window.location.href = `/clients/${client.id}`}>
                     <div className="flex items-center gap-3">
                       <div className="size-10 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center shrink-0">
-                         <img src={client.avatar} alt={client.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                         <img src={client.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name || "Client")}&background=random`} alt={client.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       </div>
                       <div>
                         <p className="text-[13px] font-black leading-none mb-1">{client.name}</p>
@@ -155,20 +155,20 @@ export default function ClientsPage() {
                   </td>
                   <td className="py-3 px-4 text-center" onClick={() => window.location.href = `/clients/${client.id}`}>
                     <div className="flex flex-col items-center">
-                      <span className="text-[13px] font-black tabular-nums">{client.bookings}</span>
+                      <span className="text-[13px] font-black tabular-nums">{client.bookings || 0}</span>
                       <span className="text-[9px] font-bold text-slate-400 uppercase">всего</span>
                     </div>
                   </td>
                   <td className="py-3 px-4 text-right" onClick={() => window.location.href = `/clients/${client.id}`}>
                     <div className="flex flex-col items-end">
-                      <span className="text-[13px] font-black tabular-nums">{formatNumber(client.spent)} сум</span>
+                      <span className="text-[13px] font-black tabular-nums">{formatNumber(client.spent || 0)} сум</span>
                       <span className="text-[9px] font-bold text-emerald-500 uppercase">Оплачено</span>
                     </div>
                   </td>
                   <td className="py-3 px-4 text-center" onClick={() => window.location.href = `/clients/${client.id}`}>
                     <div className="flex flex-col items-center">
-                      <span className="text-[12px] font-black">{format(client.joined, "dd MMM", { locale: ru })}</span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">{format(client.joined, "yyyy")}</span>
+                      <span className="text-[12px] font-black">{format(new Date(client.created_at || Date.now()), "dd MMM", { locale: ru })}</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">{format(new Date(client.created_at || Date.now()), "yyyy")}</span>
                     </div>
                   </td>
                   <td className="py-3 pr-6 text-right relative">
