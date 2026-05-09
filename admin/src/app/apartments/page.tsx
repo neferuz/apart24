@@ -225,7 +225,7 @@ export default function ApartmentsPage() {
         amenities: []
       });
       setNotification({ type: 'success', message: 'Квартира успешно добавлена в базу!' });
-      setIsAddOpen(false);
+      setIsAddDrawerOpen(false);
       setTimeout(() => setNotification(null), 3000);
     } catch (error) {
       console.error("Failed to create apartment:", error);
