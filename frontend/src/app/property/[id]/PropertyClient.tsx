@@ -205,16 +205,13 @@ export function PropertyClient() {
     <div className="min-h-screen bg-white flex flex-col font-sans max-w-md mx-auto relative border-x border-slate-100 overflow-hidden h-screen">
       {/* Header */}
       <div className={`fixed top-0 left-0 right-0 z-[1000] px-5 flex items-center justify-between transition-all duration-300 max-w-md mx-auto ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-100 pt-4 pb-4' : 'bg-transparent pt-10 pb-4'}`}>
-        <button onClick={() => router.back()} className="h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white border border-slate-100 text-slate-900 shadow-sm active:scale-95 transition-transform">
-          <ChevronLeft className="h-6 w-6 ml-[-2px]" strokeWidth={1} />
+        <button onClick={() => router.back()} className="h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white border border-slate-100 text-slate-900 active:scale-95 transition-transform">
+          <X className="h-6 w-6" strokeWidth={1} />
         </button>
         <div className="flex items-center gap-2">
-           <button className="h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white border border-slate-100 text-slate-900 shadow-sm">
-             <Upload className="h-5 w-5" strokeWidth={1.5} />
-           </button>
            <button 
             onClick={() => toggleLike(property.id)} 
-            className="h-[40px] w-[40px] rounded-full bg-white border border-slate-100 flex items-center justify-center shadow-sm"
+            className="h-[40px] w-[40px] rounded-full bg-white border border-slate-100 flex items-center justify-center"
            >
               <Heart className={cn("h-5 w-5", liked[property.id] ? "fill-rose-500 text-rose-500" : "text-slate-900")} strokeWidth={1.5} />
            </button>
@@ -341,11 +338,12 @@ export function PropertyClient() {
             </div>
           )}
 
-          {relatedApartments.length > 0 && (
-            <div className="mt-8 pt-8 border-t border-slate-100">
-               <ApartmentList title="Другие в этом ЖК" items={relatedApartments} />
-            </div>
-          )}
+          <div className="mt-8 pt-8 border-t border-slate-100">
+             <h3 className="text-[18px] font-black text-slate-600 mb-4">Локация</h3>
+             <div className="relative h-[200px] w-full rounded-[2.5rem] overflow-hidden bg-slate-50 border border-slate-100">
+                <iframe width="100%" height="100%" frameBorder="0" src={`https://maps.google.com/maps?q=${property.lat || property.address},${property.lng || ""}&t=&z=14&ie=UTF8&iwloc=&output=embed`}></iframe>
+             </div>
+          </div>
         </div>
       </div>
 
